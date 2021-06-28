@@ -1,68 +1,48 @@
 import React from 'react';
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css"
 
-const foodILike = [
-  {
-    id:1,
-    name:"kimchi",
-    rating: 3,
-    price: 3000
-  },
-  {
-    id:2,
-    name:"ice",
-    rating: 4,
-    price: 3000
-  },
-  {
-    id:3,
-    name:"jeon",
-    rating: 5,
-    price: 3000
-  },
-  {
-    id:4,
-    name:"bap",
-    rating: 2,
-    price: 3000
-  },
-  {
-    id:5,
-    name:"kim",
-    rating: 5,
-    price: 3000
-  }
-]
-
-function Food({name, OfPrice, rating }) {
-  return (
-    <div>
-      <h2>I like {name}</h2>
-      <h4>{rating}/5</h4>
-      <h4>Price of the dish is {OfPrice}</h4>
-    </div>
-  )
+class App extends React.Component{
+state = {
+  isLoading: true,
+  movies: []
+};
+getMovies = async () => {
+  // axios라는 비동기함수를 이용해서 await 시킨다 get() 을 가져올때까지 기다리는 것을 !!
+  const {
+    data: { 
+      data : {movies}}
+  } = await axios.get("https://yts-proxy.nomadcoders1.now.sh/list_movies.json?/sort_by=rating");
+  this.setState({movies, isLoading: false})
+};
+componentDidMount() {
+  this.getMovies();
 }
-
-//isRequired는 무조건 있어야한다!! 만약에 없으면 에러뜸 ! 
-//isRequired를 안적으면 object안에 없어도됨
-Food.propTypes = {
-  name: PropTypes.string.isRequired,
-  OfPrice: PropTypes.number.isRequired,
-  rating: PropTypes.number.isRequired
-}
-
-function renderFood(dish){
-  console.log(dish)
-  return <Food key={dish.id} name={dish.name} OfPrice={dish.price} rating = {dish.rating} />
-}
-
-function App() {
-  return (
-    <div className="App">
-      {foodILike.map( renderFood )}
-    </div>
+  render() {
+    const {isLoading, movies } = this.state; 
+    return (
+    <section className="container">
+      {isLoading ? (
+      <div className="loader">
+        <span className="loader__text">Loading...</span>
+      </div>
+      ) : ( 
+        <div className="movies">
+          {movies.map(movie => (
+          <Movie 
+            key={movie.id}
+            id={movie.id} 
+            year={movie.year} 
+            title={movie.title} 
+            summary={movie.summary} 
+            poster={movie.medium_cover_image} 
+            genres={movie.genres}
+          />
+        ))}
+        </div>
+      )}
+    </section>
   );
-}
-
+}}
 export default App;
